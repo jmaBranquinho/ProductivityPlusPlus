@@ -73,7 +73,10 @@ namespace Productivity__
 
         private void CopyToClipboardSlot(KeyPressedEventArgs e)
         {
-            _clipboardSlots[KeyMappings.KeyToNumber(e.Key)] = Behaviors.Behaviors.GetTextFromScreen();
+            var text = Behaviors.Behaviors.GetTextFromScreen();
+            var position = KeyMappings.KeyToNumber(e.Key);
+            _clipboardSlots[position] = text;
+            UpdateUIClipboard(position, text);
         }
 
         private void PasteFromSlot(KeyPressedEventArgs e)
@@ -85,5 +88,41 @@ namespace Productivity__
             }
         }
 
+        private void UpdateUIClipboard(int position, string text)
+        {
+            switch(position)
+            {
+                case 0:
+                    this.textBox10.Text = text;
+                    break;
+                case 1:
+                    this.textBox1.Text = text;
+                    break;
+                case 2:
+                    this.textBox2.Text = text;
+                    break;
+                case 3:
+                    this.textBox3.Text = text;
+                    break;
+                case 4:
+                    this.textBox4.Text = text;
+                    break;
+                case 5:
+                    this.textBox5.Text = text;
+                    break;
+                case 6:
+                    this.textBox6.Text = text;
+                    break;
+                case 7:
+                    this.textBox7.Text = text;
+                    break;
+                case 8:
+                    this.textBox8.Text = text;
+                    break;
+                case 9:
+                    this.textBox9.Text = text;
+                    break;
+            }
+        }
     }
 }
