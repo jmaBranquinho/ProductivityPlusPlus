@@ -30,6 +30,8 @@ namespace Productivity__
 
             _hook.RegisterHotKey(Enums.Enums.ModifierKeys.Control | Enums.Enums.ModifierKeys.Shift,
                 Keys.A);
+            _hook.RegisterHotKey(Enums.Enums.ModifierKeys.Control | Enums.Enums.ModifierKeys.Shift,
+                Keys.L);
         }
 
         private void OnKeyPressed(object sender, KeyPressedEventArgs e)
@@ -52,6 +54,9 @@ namespace Productivity__
                 {
                     case Keys.A:
                         Behaviors.Behaviors.AlternateCapitalization();
+                        break;
+                    case Keys.L:
+                        Behaviors.Behaviors.ReadClipboard();
                         break;
                 }
             }

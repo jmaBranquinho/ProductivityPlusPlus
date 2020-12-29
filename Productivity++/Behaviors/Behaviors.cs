@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 
 namespace Productivity__.Behaviors
@@ -9,9 +10,14 @@ namespace Productivity__.Behaviors
         public static string GetTextFromScreen()
         {
             SelectWholeWord();
-            CopyToClipboard();
-            var text = GetTextFromClipboard();
+            var text = CopyAndGetTextFromClipboard();
             return !string.IsNullOrEmpty(text) ? text : null;
+        }
+
+        public static string CopyAndGetTextFromClipboard()
+        {
+            CopyToClipboard();
+            return GetTextFromClipboard();
         }
 
         public static string GetTextFromClipboard()
@@ -47,6 +53,40 @@ namespace Productivity__.Behaviors
                 }
 
                 SetTextToScreen(text);
+            }
+        }
+
+        public static void ReadClipboard()
+        {
+            var text = GetTextFromClipboard();
+            Text2Speech(text);
+        }
+
+        private static void Text2Speech(string textToSpeech) {
+            //workaround for .net core
+            Execute($@"Add-Type -AssemblyName System.speech;  
+            $speak = New-Object System.Speech.Synthesis.SpeechSynthesizer;                           
+            $speak.Speak(""{textToSpeech}"");"); 
+
+            void Execute(string command)
+            {
+                var cFile = System.IO.Path.GetTempPath() + Guid.NewGuid() + ".ps1";
+
+                using var tw = new System.IO.StreamWriter(cFile, false, Encoding.UTF8);
+                tw.Write(command);
+
+                var start =
+                    new System.Diagnostics.ProcessStartInfo()
+                    {
+                        FileName = "C:\\windows\\system32\\windowspowershell\\v1.0\\powershell.exe",                
+                        LoadUserProfile = false,
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        Arguments = $"-executionpolicy bypass -File {cFile}",
+                        WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden
+                    };
+
+                var p = System.Diagnostics.Process.Start(start);
             }
         }
 
