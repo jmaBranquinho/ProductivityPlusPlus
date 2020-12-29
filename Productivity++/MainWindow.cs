@@ -1,4 +1,5 @@
 ﻿using Productivity__.Hooks;
+using Productivity__.Mappings;
 using Productivity__.Models;
 using System;
 using System.Windows.Forms;
@@ -11,8 +12,6 @@ namespace Productivity__
 
         private string[] _clipboardSlots;
 
-        private Keys[] _keyboardNumbersMapping = new Keys[] { Keys.D0, Keys.D1, Keys.D2, Keys.D3, Keys.D4, Keys.D5, Keys.D6, Keys.D7, Keys.D8, Keys.D9 };
-
         public MainWindow()
         {
             _hook = new KeyboardHook();
@@ -20,17 +19,71 @@ namespace Productivity__
 
             InitializeComponent();
 
+            _hook.KeyPressed +=
+                new EventHandler<KeyPressedEventArgs>(OnKeyPressed);
             RegisterHotkeys();
         }
 
         private void RegisterHotkeys()
         {
-            throw new NotImplementedException();
+            RegisterClipboardSlots();
+
+            _hook.RegisterHotKey(Enums.Enums.ModifierKeys.Control | Enums.Enums.ModifierKeys.Shift,
+                Keys.A);
         }
 
         private void OnKeyPressed(object sender, KeyPressedEventArgs e)
         {
-            throw new NotImplementedException();
+            var modifiers = e.Modifier.ToString();
+
+            if (modifiers == KeyMappings.ControlKey && KeyMappings.IsKeyANumber(e.Key))
+            {
+                CopyToClipboardSlot(e);
+            }
+            if (modifiers == KeyMappings.ControlShiftKey)
+            {
+                if (KeyMappings.IsKeyANumber(e.Key))
+                {
+                    PasteFromSlot(e);
+                    return;
+                }
+
+                switch (e.Key)
+                {
+                    case Keys.A:
+                        Behaviors.Behaviors.AlternateCapitalization();
+                        break;
+                }
+            }
         }
+
+        private void RegisterClipboardSlots()
+        {
+            for (int i = 0; i < Configs.Configs.ClipboardSlotsCount; i++)
+            {
+                //copy
+                _hook.RegisterHotKey(Enums.Enums.ModifierKeys.Control,
+                    KeyMappings.NumberToKey(i));
+
+                //paste
+                _hook.RegisterHotKey(Enums.Enums.ModifierKeys.Control | Enums.Enums.ModifierKeys.Shift,
+                    KeyMappings.NumberToKey(i));
+            }
+        }
+
+        private void CopyToClipboardSlot(KeyPressedEventArgs e)
+        {
+            _clipboardSlots[KeyMappings.KeyToNumber(e.Key)] = Behaviors.Behaviors.GetTextFromScreen();
+        }
+
+        private void PasteFromSlot(KeyPressedEventArgs e)
+        {
+            var text = _clipboardSlots[KeyMappings.KeyToNumber(e.Key)];
+            if (!string.IsNullOrEmpty(text))
+            {
+                Behaviors.Behaviors.SetTextToScreen(text);
+            }
+        }
+
     }
 }
