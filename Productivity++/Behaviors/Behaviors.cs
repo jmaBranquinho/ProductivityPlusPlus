@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Productivity__.Behaviors
@@ -9,8 +9,12 @@ namespace Productivity__.Behaviors
     {
         public static string GetTextFromScreen()
         {
-            SelectWholeWord();
             var text = CopyAndGetTextFromClipboard();
+            if(string.IsNullOrEmpty(text))
+            {
+                SelectWholeWord();
+                text = CopyAndGetTextFromClipboard();
+            }
             return !string.IsNullOrEmpty(text) ? text : null;
         }
 
@@ -56,38 +60,15 @@ namespace Productivity__.Behaviors
             }
         }
 
-        public static void ReadClipboard()
+        public static void ReadClipboard(string str)
         {
-            var text = GetTextFromClipboard();
-            Text2Speech(text);
+            var text = GetTextFromScreen();
+            Text2Speech(str);
         }
 
-        private static void Text2Speech(string textToSpeech) {
-            //workaround for .net core
-            Execute($@"Add-Type -AssemblyName System.speech;  
-            $speak = New-Object System.Speech.Synthesis.SpeechSynthesizer;                           
-            $speak.Speak(""{textToSpeech}"");"); 
-
-            void Execute(string command)
-            {
-                var cFile = System.IO.Path.GetTempPath() + Guid.NewGuid() + ".ps1";
-
-                using var tw = new System.IO.StreamWriter(cFile, false, Encoding.UTF8);
-                tw.Write(command);
-
-                var start =
-                    new System.Diagnostics.ProcessStartInfo()
-                    {
-                        FileName = "C:\\windows\\system32\\windowspowershell\\v1.0\\powershell.exe",                
-                        LoadUserProfile = false,
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                        Arguments = $"-executionpolicy bypass -File {cFile}",
-                        WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden
-                    };
-
-                var p = System.Diagnostics.Process.Start(start);
-            }
+        private static void Text2Speech(string textToSpeech)
+        {
+            Speaker.Speak(textToSpeech);
         }
 
         private static void SelectWholeWord()
@@ -98,6 +79,7 @@ namespace Productivity__.Behaviors
         private static void CopyToClipboard()
         {
             SendKeys.Send("^(c)");
+            Thread.Sleep(2000);
         }
 
         private static void PasteFromClipboard()

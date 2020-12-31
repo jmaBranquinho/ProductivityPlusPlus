@@ -24,13 +24,18 @@ namespace Productivity__
             RegisterHotkeys();
         }
 
+        public void Terminate()
+        {
+            _hook.Dispose();
+        }
+
         private void RegisterHotkeys()
         {
             RegisterClipboardSlots();
 
             _hook.RegisterHotKey(Enums.Enums.ModifierKeys.Control | Enums.Enums.ModifierKeys.Shift,
                 Keys.A);
-            _hook.RegisterHotKey(Enums.Enums.ModifierKeys.Control | Enums.Enums.ModifierKeys.Shift,
+            _hook.RegisterHotKey(Enums.Enums.ModifierKeys.Control,
                 Keys.L);
         }
 
@@ -38,9 +43,24 @@ namespace Productivity__
         {
             var modifiers = e.Modifier.ToString();
 
-            if (modifiers == KeyMappings.ControlKey && KeyMappings.IsKeyANumber(e.Key))
+            if (modifiers == KeyMappings.ControlKey)
             {
-                CopyToClipboardSlot(e);
+                if(KeyMappings.IsKeyANumber(e.Key))
+                {
+                    CopyToClipboardSlot(e);
+                    return;
+                }
+                
+                switch (e.Key)
+                {
+                    case Keys.L:
+                        var text = Behaviors.Behaviors.GetTextFromScreen();
+                        if (!string.IsNullOrEmpty(text))
+                        {
+                            Behaviors.Behaviors.ReadClipboard(text);
+                        }
+                        break;
+                }
             }
             if (modifiers == KeyMappings.ControlShiftKey)
             {
@@ -54,9 +74,6 @@ namespace Productivity__
                 {
                     case Keys.A:
                         Behaviors.Behaviors.AlternateCapitalization();
-                        break;
-                    case Keys.L:
-                        Behaviors.Behaviors.ReadClipboard();
                         break;
                 }
             }
@@ -95,7 +112,7 @@ namespace Productivity__
 
         private void UpdateUIClipboard(int position, string text)
         {
-            switch(position)
+            switch (position)
             {
                 case 0:
                     this.textBox10.Text = text;
