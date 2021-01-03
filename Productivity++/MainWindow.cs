@@ -2,6 +2,7 @@
 using Productivity__.Mappings;
 using Productivity__.Models;
 using System;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Productivity__
@@ -18,6 +19,8 @@ namespace Productivity__
             _clipboardSlots = new string[Configs.Configs.ClipboardSlotsCount];
 
             InitializeComponent();
+
+            comboBox1.Items.AddRange(Speaker.SpeechRate.Cast<object>().ToArray());
 
             _hook.KeyPressed +=
                 new EventHandler<KeyPressedEventArgs>(OnKeyPressed);
@@ -145,6 +148,11 @@ namespace Productivity__
                     this.textBox9.Text = text;
                     break;
             }
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Speaker.ChangeRate((int)comboBox1.SelectedItem);
         }
     }
 }

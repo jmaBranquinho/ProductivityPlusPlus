@@ -2,6 +2,6 @@
 {
     public static class Configs
     {
-        public static int ClipboardSlotsCount = 10;
+        public static int ClipboardSlotsCount = 9;
     }
 }
